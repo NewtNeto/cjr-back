@@ -25,6 +25,10 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Banco de dados
+
+A modelagem (PostgreSQL + Prisma) está documentada em [docs/banco-de-dados.md](docs/banco-de-dados.md).
+
 ## Project setup
 
 ```bash

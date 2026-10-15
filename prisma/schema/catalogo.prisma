@@ -1,0 +1,81 @@
+// Catálogo: categorias e produtos vendidos pelas lojas.
+
+enum StatusProduto {
+  RASCUNHO // ainda sendo preenchido, não aparece para clientes
+  ATIVO // à venda
+  INATIVO // pausado pela loja; não aparece, mas o histórico continua
+
+  @@map("status_produto")
+}
+
+// Categorias organizadas em até dois níveis (categoria -> subcategoria).
+// Quem cria e edita categorias é a plataforma (ADMIN), não as lojas.
+model Categoria {
+  id    String  @id @default(uuid()) @db.Uuid
+  nome  String
+  slug  String  @unique
+  ativa Boolean @default(true)
+  // Preenchido apenas em subcategorias, apontando para a categoria "mãe".
+  paiId String? @map("pai_id") @db.Uuid
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  pai      Categoria?  @relation("Subcategorias", fields: [paiId], references: [id])
+  filhas   Categoria[] @relation("Subcategorias")
+  produtos Produto[]
+
+  @@index([paiId])
+  @@map("categorias")
+}
+
+// Cada produto pertence a UMA loja. Não há variações (tamanho, cor): se a loja
+// vende a mesma peça em dois tamanhos, cadastra dois produtos.
+model Produto {
+  id          String        @id @default(uuid()) @db.Uuid
+  lojaId      String        @map("loja_id") @db.Uuid
+  categoriaId String        @map("categoria_id") @db.Uuid
+  // Título do anúncio (mesmo termo usado nos requisitos).
+  titulo      String
+  // Texto usado na URL do produto. Único dentro da mesma loja.
+  slug        String
+  descricao   String?
+  // Código interno da loja (opcional). Único dentro da mesma loja quando informado.
+  sku         String?
+  preco       Decimal       @db.Decimal(12, 2)
+  // Quantidade disponível. O serviço deve baixar o estoque ao confirmar o pagamento.
+  estoque     Int           @default(0)
+  status      StatusProduto @default(RASCUNHO)
+
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+  excluidoEm   DateTime? @map("excluido_em")
+
+  loja          Loja               @relation(fields: [lojaId], references: [id])
+  categoria     Categoria          @relation(fields: [categoriaId], references: [id])
+  imagens       ImagemProduto[]
+  itensCarrinho ItemCarrinho[]
+  itensPedido   ItemPedido[]
+  avaliacoes    AvaliacaoProduto[]
+
+  @@unique([lojaId, slug])
+  @@unique([lojaId, sku])
+  @@index([categoriaId])
+  @@index([lojaId, status])
+  @@map("produtos")
+}
+
+model ImagemProduto {
+  id        String @id @default(uuid()) @db.Uuid
+  produtoId String @map("produto_id") @db.Uuid
+  url       String
+  // Posição na galeria. A imagem de ordem 0 é a capa.
+  ordem     Int    @default(0)
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId])
+  @@map("imagens_produto")
+}

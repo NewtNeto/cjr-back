@@ -1,3 +1,6 @@
 node_modules
 dist
 .env
+# Código gerado pelo Prisma (recriado com `npm run db:gerar`)
+src/generated
+*.tsbuildinfo

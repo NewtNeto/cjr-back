@@ -1,0 +1,62 @@
+// Lojas virtuais e as pessoas que trabalham nelas.
+
+enum StatusLoja {
+  PENDENTE // cadastrada, aguardando aprovação de um ADMIN
+  ATIVA // aprovada e vendendo
+  SUSPENSA // bloqueada temporariamente pela plataforma
+  ENCERRADA // fechada definitivamente (o histórico é mantido)
+
+  @@map("status_loja")
+}
+
+// Papel da pessoa DENTRO de uma loja específica (diferente do papel global).
+enum PapelNaLoja {
+  DONO
+  VENDEDOR
+
+  @@map("papel_na_loja")
+}
+
+model Loja {
+  id           String     @id @default(uuid()) @db.Uuid
+  nome         String
+  // Texto usado na URL da loja. Ex.: "casa-do-cafe". Único na plataforma.
+  slug         String     @unique
+  descricao    String?
+  logoUrl      String?    @map("logo_url")
+  emailContato String     @map("email_contato")
+  telefone     String?
+  // Somente números (14 dígitos). Opcional, único quando informado.
+  cnpj         String?    @unique
+  status       StatusLoja @default(PENDENTE)
+
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+  excluidoEm   DateTime? @map("excluido_em")
+
+  membros    MembroLoja[]
+  produtos   Produto[]
+  pedidos    Pedido[]
+  avaliacoes AvaliacaoLoja[]
+
+  @@map("lojas")
+}
+
+// Liga uma pessoa a uma loja (quem é dono e quem vende nela).
+model MembroLoja {
+  id        String      @id @default(uuid()) @db.Uuid
+  lojaId    String      @map("loja_id") @db.Uuid
+  usuarioId String      @map("usuario_id") @db.Uuid
+  papel     PapelNaLoja @default(VENDEDOR)
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  loja    Loja    @relation(fields: [lojaId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  // A mesma pessoa não pode aparecer duas vezes na mesma loja.
+  @@unique([lojaId, usuarioId])
+  @@index([usuarioId])
+  @@map("membros_loja")
+}
