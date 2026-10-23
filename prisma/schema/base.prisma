@@ -1,0 +1,26 @@
+// Configuração base do Prisma.
+//
+// O schema está dividido em vários arquivos dentro desta pasta, um por assunto
+// (usuarios, lojas, catalogo, pedidos, financeiro). O Prisma junta todos eles
+// automaticamente, então não é preciso importar nada entre os arquivos.
+//
+// Convenções adotadas em TODO o schema (mantenha ao criar novas tabelas):
+//  - Nomes de models e campos em português; tabelas e colunas no banco em snake_case.
+//  - Chave primária sempre `id` do tipo UUID.
+//  - Dinheiro sempre em Decimal(12, 2). Nunca usar Float para valores em reais.
+//  - Todo registro tem `criadoEm` e `atualizadoEm`.
+//  - Exclusão lógica (`excluidoEm`) só onde o registro pode ser "apagado" pelo usuário.
+//    Registros financeiros e de pedidos NUNCA são apagados: mudam de status.
+
+generator client {
+  provider = "prisma-client"
+  // Pasta onde o código gerado fica. Ela é recriada com `npm run db:gerar`
+  // e não vai para o git.
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // A URL de conexão NÃO fica aqui: ela é lida da variável DATABASE_URL
+  // pelo arquivo prisma.config.ts, na raiz do projeto.
+}

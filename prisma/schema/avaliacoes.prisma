@@ -1,0 +1,58 @@
+// Avaliações de lojas e de produtos feitas pelos usuários.
+//
+// Regras do banco:
+//  - Cada usuário tem no máximo UMA avaliação por loja e UMA por produto.
+//    Para mudar a opinião, ele edita a avaliação que já existe.
+//  - A nota vai de 0 a 5 (regra CHECK na migration restricoes_de_valores).
+//  - A média e a quantidade de avaliações NÃO são guardadas: são calculadas
+//    na consulta. Assim não existe número "desatualizado" para corrigir depois.
+//
+// Regras que o serviço precisa cuidar:
+//  - Só os membros da loja avaliada podem responder (e não podem avaliar a própria loja).
+//  - Decidir se só quem comprou pode avaliar (hoje o banco não exige).
+
+model AvaliacaoLoja {
+  id         String  @id @default(uuid()) @db.Uuid
+  lojaId     String  @map("loja_id") @db.Uuid
+  usuarioId  String  @map("usuario_id") @db.Uuid
+  // Número inteiro de 0 a 5 estrelas.
+  nota       Int
+  comentario String?
+
+  // Resposta da loja à avaliação (no máximo uma). Vazia até a loja responder.
+  resposta     String?
+  respondidaEm DateTime? @map("respondida_em")
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  loja    Loja    @relation(fields: [lojaId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([lojaId, usuarioId])
+  @@index([usuarioId])
+  @@map("avaliacoes_loja")
+}
+
+model AvaliacaoProduto {
+  id         String  @id @default(uuid()) @db.Uuid
+  produtoId  String  @map("produto_id") @db.Uuid
+  usuarioId  String  @map("usuario_id") @db.Uuid
+  // Número inteiro de 0 a 5 estrelas.
+  nota       Int
+  comentario String?
+
+  // Resposta da loja dona do produto (no máximo uma).
+  resposta     String?
+  respondidaEm DateTime? @map("respondida_em")
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  produto Produto @relation(fields: [produtoId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@unique([produtoId, usuarioId])
+  @@index([usuarioId])
+  @@map("avaliacoes_produto")
+}

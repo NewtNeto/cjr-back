@@ -1,0 +1,66 @@
+// Pessoas que usam o sistema e seus endereços.
+
+// Papel GLOBAL da pessoa no sistema. É um valor fixo, sem tabela de permissões.
+enum PapelUsuario {
+  ADMIN // equipe da plataforma: acesso total
+  VENDEDOR // atua em uma ou mais lojas (veja MembroLoja)
+  CLIENTE // comprador comum
+
+  @@map("papel_usuario")
+}
+
+model Usuario {
+  id                String       @id @default(uuid()) @db.Uuid
+  // Nome completo da pessoa (obrigatório no cadastro).
+  nome              String
+  // Nome de acesso público, ex.: "maria.silva" (obrigatório no cadastro).
+  // Único na plataforma. O serviço deve salvar sempre em minúsculas, para que
+  // "Maria" e "maria" não sejam tratados como nomes diferentes.
+  nomeUsuario       String       @unique @map("nome_usuario")
+  // Também deve ser salvo em minúsculas pelo serviço.
+  email             String       @unique
+  // Nunca guardar a senha em texto puro: aqui vai apenas o hash.
+  senhaHash         String       @map("senha_hash")
+  telefone          String?
+  // Somente números (11 dígitos). Opcional no cadastro, único quando informado.
+  cpf               String?      @unique
+  papel             PapelUsuario @default(CLIENTE)
+  // Permite bloquear o acesso sem apagar o histórico da pessoa.
+  ativo             Boolean      @default(true)
+  emailVerificadoEm DateTime?    @map("email_verificado_em")
+
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+  excluidoEm   DateTime? @map("excluido_em")
+
+  lojas             MembroLoja[]
+  carrinho          Carrinho?
+  pedidos           Pedido[]
+  tokensSenha       TokenRecuperacaoSenha[]
+  avaliacoesLoja    AvaliacaoLoja[]
+  avaliacoesProduto AvaliacaoProduto[]
+
+  @@map("usuarios")
+}
+
+// Solicitações de "Esqueceu a senha?". Cada solicitação gera um token enviado por e-mail.
+// Guardamos apenas o HASH do token (como numa senha): se o banco vazar, os
+// links de recuperação não podem ser usados.
+//
+// Um token só vale se: não passou de `expiraEm` e `usadoEm` está vazio.
+// Ao trocar a senha, o serviço preenche `usadoEm`.
+model TokenRecuperacaoSenha {
+  id        String    @id @default(uuid()) @db.Uuid
+  usuarioId String    @map("usuario_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiraEm  DateTime  @map("expira_em")
+  usadoEm   DateTime? @map("usado_em")
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  // Se o usuário for removido de vez, seus tokens vão junto.
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@map("tokens_recuperacao_senha")
+}
