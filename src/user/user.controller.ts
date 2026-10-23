@@ -13,6 +13,12 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  login(@Body() dados: { email: string; senha: string }) {
+    return this.userService.login(dados.email, dados.senha);
+  }
+
   @Get()
   findAll() {
     return this.userService.findAll();

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException,   UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../database/prisma.service';
@@ -50,7 +50,23 @@ export class UserService {
       },
     });
   }
+  async login(email: string, senha: string) {
+    const user = await this.prisma.usuario.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        excluidoEm: null,
+        ativo: true,
+      },
+    });
 
+    if (!user || !(await bcrypt.compare(senha, user.senhaHash))) {
+      throw new UnauthorizedException('E-mail ou senha incorretos.');
+    }
+
+    const { senhaHash, ...userData } = user;
+
+    return userData;
+  }
   async findAll() {
     return this.prisma.usuario.findMany({
       where: { excluidoEm: null },
