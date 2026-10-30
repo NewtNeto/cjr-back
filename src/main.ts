@@ -10,7 +10,8 @@ async function bootstrap() {
     origin: 'http://localhost:3000',
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  // whitelist descarta campos que não existem no dto (ex.: "papel" no cadastro)
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.listen(process.env.PORT ?? 3001);
 }
 void bootstrap();
