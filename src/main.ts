@@ -8,6 +8,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: 'http://localhost:3000',
+    credentials: true,
   });
 
   // whitelist descarta campos que não existem no dto (ex.: "papel" no cadastro)
