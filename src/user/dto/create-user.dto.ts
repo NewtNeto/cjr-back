@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
-import { PapelUsuario } from '../../generated/prisma/client';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
 export class CreateUserDto {
     @IsString()
@@ -26,8 +25,4 @@ export class CreateUserDto {
     @IsString()
     @Matches(/^\d{11}$/, { message: 'O CPF deve conter exatamente 11 dígitos numéricos.' })
     cpf?: string;
-
-    @IsOptional()
-    @IsEnum(PapelUsuario, { message: 'Papel de usuário inválido.' })
-    papel?: PapelUsuario;
 }

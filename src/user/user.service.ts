@@ -50,7 +50,6 @@ export class UserService {
       },
     });
   }
-
   async findAll() {
     return this.prisma.usuario.findMany({
       where: { excluidoEm: null },
