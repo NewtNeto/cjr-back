@@ -1,4 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import type { RequisicaoAutenticada } from './auth.guard';
@@ -12,8 +13,21 @@ export class AuthController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    login(@Body() dados: LoginDto) {
-        return this.authService.login(dados.email, dados.senha);
+    async login(
+        @Body() dados: LoginDto,
+        @Res({ passthrough: true }) res: Response
+    ) {
+        const resultado = await this.authService.login(dados.email, dados.senha);
+        const token = resultado.token;
+
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 1000 * 60 * 60 * 24,
+        });
+
+        return resultado;
     }
 
     // devolve o usuário dono do token
@@ -33,5 +47,16 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     redefinirSenha(@Body() dados: RedefinirSenhaDto) {
         return this.authService.redefinirSenha(dados.token, dados.senha);
+    }
+
+    @Post('logout')
+    @HttpCode(HttpStatus.OK)
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        });
+        return { message: 'Logout realizado com sucesso' };
     }
 }
