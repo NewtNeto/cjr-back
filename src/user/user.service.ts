@@ -1,8 +1,11 @@
-import { ConflictException, Injectable, NotFoundException,   UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { unlink } from 'fs/promises';
+import { basename, join } from 'path';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../database/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { PASTA_FOTOS, PREFIXO_URL_FOTOS } from './foto-upload';
 
 @Injectable()
 export class UserService {
@@ -42,6 +45,7 @@ export class UserService {
         nome: true,
         nomeUsuario: true,
         email: true,
+        fotoUrl: true,
         telefone: true,
         cpf: true,
         papel: true,
@@ -49,23 +53,6 @@ export class UserService {
         criadoEm: true,
       },
     });
-  }
-  async login(email: string, senha: string) {
-    const user = await this.prisma.usuario.findFirst({
-      where: {
-        email: email.toLowerCase(),
-        excluidoEm: null,
-        ativo: true,
-      },
-    });
-
-    if (!user || !(await bcrypt.compare(senha, user.senhaHash))) {
-      throw new UnauthorizedException('E-mail ou senha incorretos.');
-    }
-
-    const { senhaHash, ...userData } = user;
-
-    return userData;
   }
   async findAll() {
     return this.prisma.usuario.findMany({
@@ -75,6 +62,7 @@ export class UserService {
         nome: true,
         nomeUsuario: true,
         email: true,
+        fotoUrl: true,
         telefone: true,
         cpf: true,
         papel: true,
@@ -92,6 +80,7 @@ export class UserService {
         nome: true,
         nomeUsuario: true,
         email: true,
+        fotoUrl: true,
         telefone: true,
         cpf: true,
         papel: true,
@@ -131,6 +120,7 @@ export class UserService {
         nome: true,
         nomeUsuario: true,
         email: true,
+        fotoUrl: true,
         telefone: true,
         cpf: true,
         papel: true,
@@ -138,6 +128,46 @@ export class UserService {
         atualizadoEm: true,
       },
     });
+  }
+
+  async atualizarFoto(id: string, foto: Express.Multer.File | undefined) {
+    if (!foto) {
+      throw new BadRequestException('Envie uma imagem no campo "foto".');
+    }
+
+    const atual = await this.prisma.usuario.findFirst({
+      where: { id, excluidoEm: null },
+      select: { fotoUrl: true },
+    });
+
+    if (!atual) {
+      await this.apagarFoto(foto.filename);
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    const usuario = await this.prisma.usuario.update({
+      where: { id },
+      data: { fotoUrl: `${PREFIXO_URL_FOTOS}${foto.filename}` },
+      select: {
+        id: true,
+        nome: true,
+        nomeUsuario: true,
+        email: true,
+        fotoUrl: true,
+      },
+    });
+
+    // a foto antiga não é mais usada: apaga o arquivo para não acumular lixo
+    if (atual.fotoUrl) {
+      await this.apagarFoto(basename(atual.fotoUrl));
+    }
+
+    return usuario;
+  }
+
+  private async apagarFoto(nomeArquivo: string) {
+    // se o arquivo já não existir, não tem problema
+    await unlink(join(PASTA_FOTOS, nomeArquivo)).catch(() => undefined);
   }
 
   async remove(id: string) {
