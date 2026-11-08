@@ -4,3 +4,5 @@ dist
 # Código gerado pelo Prisma (recriado com `npm run db:gerar`)
 src/generated
 *.tsbuildinfo
+# Fotos enviadas pelos usuários (ficam só no computador/servidor)
+uploads

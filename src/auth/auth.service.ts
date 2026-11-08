@@ -20,6 +20,7 @@ const CAMPOS_PUBLICOS = {
     nome: true,
     nomeUsuario: true,
     email: true,
+    fotoUrl: true,
     papel: true,
 } as const;
 

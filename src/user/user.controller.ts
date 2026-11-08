@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuard, type RequisicaoAutenticada } from '../auth/auth.guard';
+import { opcoesUploadFoto } from './foto-upload';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,6 +14,14 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  // troca a foto de quem está logado. O front envia um FormData com o arquivo no campo "foto".
+  @Patch('me/foto')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('foto', opcoesUploadFoto))
+  atualizarFoto(@Req() requisicao: RequisicaoAutenticada, @UploadedFile() foto: Express.Multer.File | undefined) {
+    return this.userService.atualizarFoto(requisicao.usuario.sub, foto);
   }
 
   @Get()
