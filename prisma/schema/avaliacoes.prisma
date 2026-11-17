@@ -29,6 +29,9 @@ model AvaliacaoLoja {
   loja    Loja    @relation(fields: [lojaId], references: [id])
   usuario Usuario @relation(fields: [usuarioId], references: [id])
 
+  // comentarios de outras pessoas na avaliacao (o texto da propria avaliacao e `comentario`)
+  comentarios Comentario[]
+
   @@unique([lojaId, usuarioId])
   @@index([usuarioId])
   @@map("avaliacoes_loja")
@@ -51,6 +54,9 @@ model AvaliacaoProduto {
 
   produto Produto @relation(fields: [produtoId], references: [id])
   usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  // comentarios de outras pessoas na avaliacao (o texto da propria avaliacao e `comentario`)
+  comentarios Comentario[]
 
   @@unique([produtoId, usuarioId])
   @@index([usuarioId])

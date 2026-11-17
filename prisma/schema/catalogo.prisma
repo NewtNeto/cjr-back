@@ -57,6 +57,7 @@ model Produto {
   itensCarrinho ItemCarrinho[]
   itensPedido   ItemPedido[]
   avaliacoes    AvaliacaoProduto[]
+  comentarios   Comentario[]
 
   @@unique([lojaId, slug])
   @@unique([lojaId, sku])

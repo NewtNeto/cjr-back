@@ -41,6 +41,7 @@ model Usuario {
   tokensSenha       TokenRecuperacaoSenha[]
   avaliacoesLoja    AvaliacaoLoja[]
   avaliacoesProduto AvaliacaoProduto[]
+  comentarios       Comentario[]
 
   @@map("usuarios")
 }

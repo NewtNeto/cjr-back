@@ -1,0 +1,34 @@
+// implementacao de comentarios
+// o comentario fica em uma avaliacao de loja, em uma avaliacao de produto ou direto em um produto,
+// sempre em um lugar so (regra CHECK na migration comentarios)
+// lista simples em ordem de data, sem resposta a outro comentario
+
+model Comentario {
+  id        String @id @default(uuid()) @db.Uuid
+  // autor do comentario
+  usuarioId String @map("usuario_id") @db.Uuid
+  // nao pode ficar vazio
+  texto     String
+
+  // onde o comentario foi feito: so um destes e preenchido
+  avaliacaoLojaId    String? @map("avaliacao_loja_id") @db.Uuid
+  avaliacaoProdutoId String? @map("avaliacao_produto_id") @db.Uuid
+  produtoId          String? @map("produto_id") @db.Uuid
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  // diferente de criadoEm: comentario editado
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  usuario          Usuario           @relation(fields: [usuarioId], references: [id])
+  // apagou a avaliacao ou o produto, os comentarios vao junto
+  avaliacaoLoja    AvaliacaoLoja?    @relation(fields: [avaliacaoLojaId], references: [id], onDelete: Cascade)
+  avaliacaoProduto AvaliacaoProduto? @relation(fields: [avaliacaoProdutoId], references: [id], onDelete: Cascade)
+  produto          Produto?          @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  // listando os comentarios de cada lugar em ordem de data
+  @@index([avaliacaoLojaId, criadoEm])
+  @@index([avaliacaoProdutoId, criadoEm])
+  @@index([produtoId, criadoEm])
+  @@index([usuarioId])
+  @@map("comentarios")
+}
