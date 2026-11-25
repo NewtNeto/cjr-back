@@ -24,6 +24,7 @@ model Categoria {
   pai      Categoria?  @relation("Subcategorias", fields: [paiId], references: [id])
   filhas   Categoria[] @relation("Subcategorias")
   produtos Produto[]
+  lojas    Loja[]
 
   @@index([paiId])
   @@map("categorias")
