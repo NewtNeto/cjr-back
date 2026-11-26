@@ -143,4 +143,4 @@ export class AvaliacoesService {
       where: { id },
     });
   }
-}
+}

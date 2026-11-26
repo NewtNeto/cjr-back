@@ -64,4 +64,4 @@ export class AvaliacoesController {
   removeProduto(@Param('id', ParseIntPipe) id: number) {
     return this.avaliacoesService.removeProduto(id);
   }
-}
+}

@@ -61,4 +61,4 @@ export class UpdateAvaliacaoProdutoDto {
   @IsOptional()
   @IsString()
   comentario?: string;
-}
+}
