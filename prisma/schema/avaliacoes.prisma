@@ -12,9 +12,9 @@
 //  - Decidir se só quem comprou pode avaliar (hoje o banco não exige).
 
 model AvaliacaoLoja {
-  id         String  @id @default(uuid()) @db.Uuid
-  lojaId     String  @map("loja_id") @db.Uuid
-  usuarioId  String  @map("usuario_id") @db.Uuid
+  id         Int     @id @default(autoincrement())
+  lojaId     Int     @map("loja_id")
+  usuarioId  Int     @map("usuario_id")
   // Número inteiro de 0 a 5 estrelas.
   nota       Int
   comentario String?
@@ -38,9 +38,9 @@ model AvaliacaoLoja {
 }
 
 model AvaliacaoProduto {
-  id         String  @id @default(uuid()) @db.Uuid
-  produtoId  String  @map("produto_id") @db.Uuid
-  usuarioId  String  @map("usuario_id") @db.Uuid
+  id         Int     @id @default(autoincrement())
+  produtoId  Int     @map("produto_id")
+  usuarioId  Int     @map("usuario_id")
   // Número inteiro de 0 a 5 estrelas.
   nota       Int
   comentario String?

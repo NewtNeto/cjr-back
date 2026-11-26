@@ -7,7 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -40,7 +40,7 @@ export class CategoriaController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriaService.findOne(id);
   }
 
@@ -48,7 +48,7 @@ export class CategoriaController {
   @UseGuards(AuthGuard)
   update(
     @Req() requisicao: RequisicaoAutenticada,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
   ) {
     this.exigirAdmin(requisicao);
@@ -58,7 +58,7 @@ export class CategoriaController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Req() requisicao: RequisicaoAutenticada, @Param('id', ParseUUIDPipe) id: string) {
+  remove(@Req() requisicao: RequisicaoAutenticada, @Param('id', ParseIntPipe) id: number) {
     this.exigirAdmin(requisicao);
     return this.categoriaService.remove(id);
   }

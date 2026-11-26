@@ -4,16 +4,16 @@
 // lista simples em ordem de data, sem resposta a outro comentario
 
 model Comentario {
-  id        String @id @default(uuid()) @db.Uuid
+  id        Int    @id @default(autoincrement())
   // autor do comentario
-  usuarioId String @map("usuario_id") @db.Uuid
+  usuarioId Int    @map("usuario_id")
   // nao pode ficar vazio
   texto     String
 
   // onde o comentario foi feito: so um destes e preenchido
-  avaliacaoLojaId    String? @map("avaliacao_loja_id") @db.Uuid
-  avaliacaoProdutoId String? @map("avaliacao_produto_id") @db.Uuid
-  produtoId          String? @map("produto_id") @db.Uuid
+  avaliacaoLojaId    Int? @map("avaliacao_loja_id")
+  avaliacaoProdutoId Int? @map("avaliacao_produto_id")
+  produtoId          Int? @map("produto_id")
 
   criadoEm     DateTime @default(now()) @map("criado_em")
   // diferente de criadoEm: comentario editado

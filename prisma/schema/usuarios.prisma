@@ -10,7 +10,7 @@ enum PapelUsuario {
 }
 
 model Usuario {
-  id                String       @id @default(uuid()) @db.Uuid
+  id                Int          @id @default(autoincrement())
   // Nome completo da pessoa (obrigatório no cadastro).
   nome              String
   // Nome de acesso público, ex.: "maria.silva" (obrigatório no cadastro).
@@ -53,8 +53,8 @@ model Usuario {
 // Um token só vale se: não passou de `expiraEm` e `usadoEm` está vazio.
 // Ao trocar a senha, o serviço preenche `usadoEm`.
 model TokenRecuperacaoSenha {
-  id        String    @id @default(uuid()) @db.Uuid
-  usuarioId String    @map("usuario_id") @db.Uuid
+  id        Int       @id @default(autoincrement())
+  usuarioId Int       @map("usuario_id")
   tokenHash String    @unique @map("token_hash")
   expiraEm  DateTime  @map("expira_em")
   usadoEm   DateTime? @map("usado_em")

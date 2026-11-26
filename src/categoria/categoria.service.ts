@@ -25,7 +25,7 @@ export class CategoriaService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const categoria = await this.prisma.categoria.findUnique({
       where: { id },
       include: {
@@ -41,7 +41,7 @@ export class CategoriaService {
     return categoria;
   }
 
-  async update(id: string, updateCategoriaDto: UpdateCategoriaDto) {
+  async update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
     const categoria = await this.findOne(id);
 
     if (updateCategoriaDto.slug && updateCategoriaDto.slug !== categoria.slug) {
@@ -69,7 +69,7 @@ export class CategoriaService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const categoria = await this.findOne(id);
 
     if (categoria.filhas.length > 0) {
@@ -96,7 +96,7 @@ export class CategoriaService {
   }
 
   // o pai precisa existir e ser uma categoria principal (as categorias têm no máximo 2 níveis)
-  private async validarPai(paiId: string) {
+  private async validarPai(paiId: number) {
     const pai = await this.prisma.categoria.findUnique({ where: { id: paiId } });
 
     if (!pai) {

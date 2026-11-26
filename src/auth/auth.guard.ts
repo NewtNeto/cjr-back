@@ -5,7 +5,7 @@ import { PapelUsuario } from '../generated/prisma/client';
 
 // dados guardados dentro do token
 export interface PayloadToken {
-    sub: string; // id do usuário
+    sub: number; // id do usuário
     papel: PapelUsuario;
 }
 
@@ -26,11 +26,19 @@ export class AuthGuard implements CanActivate {
             throw new UnauthorizedException('Faça login para continuar.');
         }
 
+        let payload: PayloadToken;
         try {
-            requisicao.usuario = await this.jwtService.verifyAsync<PayloadToken>(token);
+            payload = await this.jwtService.verifyAsync<PayloadToken>(token);
         } catch {
             throw new UnauthorizedException('Sessão expirada. Faça login novamente.');
         }
+
+        // tokens antigos (de quando o id era UUID) guardam o id como texto: pede login de novo
+        if (!Number.isInteger(payload.sub)) {
+            throw new UnauthorizedException('Sessão expirada. Faça login novamente.');
+        }
+
+        requisicao.usuario = payload;
 
         return true;
     }

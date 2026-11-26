@@ -1,7 +1,8 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsInt,
   IsOptional,
-  IsUUID,
   Matches,
   MaxLength,
 } from 'class-validator';
@@ -16,8 +17,9 @@ export class CreateLojaDto {
   nome: string;
 
   // categoria principal escolhida no modal
-  @IsUUID('all', { message: 'Escolha uma categoria.' })
-  categoriaId: string;
+  @Type(() => Number)
+  @IsInt({ message: 'Escolha uma categoria.' })
+  categoriaId: number;
 
   // sem e-mail, o back usa o e-mail do dono
   @IsOptional()

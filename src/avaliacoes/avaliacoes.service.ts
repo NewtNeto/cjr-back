@@ -25,22 +25,53 @@ export class AvaliacoesService {
   }
 
   async findAllLojas() {
-    return this.prisma.avaliacaoLoja.findMany();
+    return this.prisma.avaliacaoLoja.findMany({
+      orderBy: { criadoEm: 'desc' },
+      include: {
+        usuario: {
+          select: { id: true, nome: true, nomeUsuario: true, fotoUrl: true },
+        },
+        loja: {
+          select: { id: true, nome: true, slug: true },
+        },
+      },
+    });
   }
 
-  async findOneLoja(id: string) {
+  async findOneLoja(id: number) {
     const avaliacao = await this.prisma.avaliacaoLoja.findUnique({
       where: { id },
+      include: {
+        usuario: {
+          select: { id: true, nome: true, nomeUsuario: true, fotoUrl: true },
+        },
+        loja: {
+          select: {
+            membros: {
+              where: { papel: 'DONO' },
+              select: { usuarioId: true },
+              take: 1,
+            },
+          },
+        },
+      },
     });
 
     if (!avaliacao) {
       throw new NotFoundException('Avaliação de loja não encontrada.');
     }
 
-    return avaliacao;
+    const { loja, ...resto } = avaliacao;
+
+    return {
+      ...resto,
+      loja: {
+        donoId: loja?.membros[0]?.usuarioId ?? null,
+      },
+    };
   }
 
-  async updateLoja(id: string, dto: UpdateAvaliacaoLojaDto) {
+  async updateLoja(id: number, dto: UpdateAvaliacaoLojaDto) {
     await this.findOneLoja(id);
 
     return this.prisma.avaliacaoLoja.update({
@@ -49,7 +80,7 @@ export class AvaliacoesService {
     });
   }
 
-  async removeLoja(id: string) {
+  async removeLoja(id: number) {
     await this.findOneLoja(id);
 
     return this.prisma.avaliacaoLoja.delete({
@@ -71,10 +102,20 @@ export class AvaliacoesService {
   }
 
   async findAllProdutos() {
-    return this.prisma.avaliacaoProduto.findMany();
+    return this.prisma.avaliacaoProduto.findMany({
+      orderBy: { criadoEm: 'desc' },
+      include: {
+        usuario: {
+          select: { id: true, nome: true, nomeUsuario: true, fotoUrl: true },
+        },
+        produto: {
+          select: { id: true, titulo: true, slug: true },
+        },
+      },
+    });
   }
 
-  async findOneProduto(id: string) {
+  async findOneProduto(id: number) {
     const avaliacao = await this.prisma.avaliacaoProduto.findUnique({
       where: { id },
     });
@@ -86,7 +127,7 @@ export class AvaliacoesService {
     return avaliacao;
   }
 
-  async updateProduto(id: string, dto: UpdateAvaliacaoProdutoDto) {
+  async updateProduto(id: number, dto: UpdateAvaliacaoProdutoDto) {
     await this.findOneProduto(id);
 
     return this.prisma.avaliacaoProduto.update({
@@ -95,11 +136,11 @@ export class AvaliacoesService {
     });
   }
 
-  async removeProduto(id: string) {
+  async removeProduto(id: number) {
     await this.findOneProduto(id);
 
     return this.prisma.avaliacaoProduto.delete({
       where: { id },
     });
   }
-}
+}

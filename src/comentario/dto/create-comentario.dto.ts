@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, IsInt } from 'class-validator';
 
 export class CreateComentarioDto {
     @IsString({ message: 'O texto deve ser uma string.' })
@@ -6,14 +7,17 @@ export class CreateComentarioDto {
     texto: string;
 
     @IsOptional()
-    @IsUUID('4', { message: 'ID da avaliação da loja inválido.' })
-    avaliacaoLojaId?: string;
+    @Type(() => Number)
+    @IsInt({ message: 'ID da avaliação da loja inválido.' })
+    avaliacaoLojaId?: number;
 
     @IsOptional()
-    @IsUUID('4', { message: 'ID da avaliação do produto inválido.' })
-    avaliacaoProdutoId?: string;
+    @Type(() => Number)
+    @IsInt({ message: 'ID da avaliação do produto inválido.' })
+    avaliacaoProdutoId?: number;
 
     @IsOptional()
-    @IsUUID('4', { message: 'ID do produto inválido.' })
-    produtoId?: string;
+    @Type(() => Number)
+    @IsInt({ message: 'ID do produto inválido.' })
+    produtoId?: number;
 }

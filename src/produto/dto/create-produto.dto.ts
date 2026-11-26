@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsInt, Min, IsEnum, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsInt, Min, IsEnum } from 'class-validator';
 
 enum StatusProduto {
     RASCUNHO = 'RASCUNHO',
@@ -7,13 +8,15 @@ enum StatusProduto {
 }
 
 export class CreateProdutoDto {
-    @IsUUID()
+    @Type(() => Number)
+    @IsInt()
     @IsNotEmpty()
-    lojaId: string;
+    lojaId: number;
 
-    @IsUUID()
+    @Type(() => Number)
+    @IsInt()
     @IsNotEmpty()
-    categoriaId: string;
+    categoriaId: number;
 
     @IsString()
     @IsNotEmpty()
