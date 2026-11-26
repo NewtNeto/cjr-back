@@ -19,8 +19,9 @@ async function bootstrap() {
   // deixa as fotos enviadas acessíveis em http://localhost:3001/uploads/...
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads/' });
 
-  // whitelist descarta campos que não existem no dto (ex.: "papel" no cadastro)
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  // whitelist descarta campos que não existem no dto (ex.: "papel" no cadastro).
+  // transform aplica as conversões dos dtos, ex.: o id "3" que chega de um formulário vira o número 3
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(process.env.PORT ?? 3001);
 }
 void bootstrap();

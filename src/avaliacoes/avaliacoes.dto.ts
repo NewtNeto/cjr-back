@@ -1,11 +1,14 @@
-import { IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class CreateAvaliacaoLojaDto {
-  @IsUUID()
-  lojaId: string;
+  @Type(() => Number)
+  @IsInt()
+  lojaId: number;
 
-  @IsUUID()
-  usuarioId: string;
+  @Type(() => Number)
+  @IsInt()
+  usuarioId: number;
 
   @IsInt()
   @Min(0)
@@ -30,11 +33,13 @@ export class UpdateAvaliacaoLojaDto {
 }
 
 export class CreateAvaliacaoProdutoDto {
-  @IsUUID()
-  produtoId: string;
+  @Type(() => Number)
+  @IsInt()
+  produtoId: number;
 
-  @IsUUID()
-  usuarioId: string;
+  @Type(() => Number)
+  @IsInt()
+  usuarioId: number;
 
   @IsInt()
   @Min(0)

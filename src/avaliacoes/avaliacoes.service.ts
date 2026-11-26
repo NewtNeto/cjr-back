@@ -38,7 +38,7 @@ export class AvaliacoesService {
     });
   }
 
-  async findOneLoja(id: string) {
+  async findOneLoja(id: number) {
     const avaliacao = await this.prisma.avaliacaoLoja.findUnique({
       where: { id },
       include: {
@@ -71,7 +71,7 @@ export class AvaliacoesService {
     };
   }
 
-  async updateLoja(id: string, dto: UpdateAvaliacaoLojaDto) {
+  async updateLoja(id: number, dto: UpdateAvaliacaoLojaDto) {
     await this.findOneLoja(id);
 
     return this.prisma.avaliacaoLoja.update({
@@ -80,7 +80,7 @@ export class AvaliacoesService {
     });
   }
 
-  async removeLoja(id: string) {
+  async removeLoja(id: number) {
     await this.findOneLoja(id);
 
     return this.prisma.avaliacaoLoja.delete({
@@ -115,7 +115,7 @@ export class AvaliacoesService {
     });
   }
 
-  async findOneProduto(id: string) {
+  async findOneProduto(id: number) {
     const avaliacao = await this.prisma.avaliacaoProduto.findUnique({
       where: { id },
     });
@@ -127,7 +127,7 @@ export class AvaliacoesService {
     return avaliacao;
   }
 
-  async updateProduto(id: string, dto: UpdateAvaliacaoProdutoDto) {
+  async updateProduto(id: number, dto: UpdateAvaliacaoProdutoDto) {
     await this.findOneProduto(id);
 
     return this.prisma.avaliacaoProduto.update({
@@ -136,7 +136,7 @@ export class AvaliacoesService {
     });
   }
 
-  async removeProduto(id: string) {
+  async removeProduto(id: number) {
     await this.findOneProduto(id);
 
     return this.prisma.avaliacaoProduto.delete({

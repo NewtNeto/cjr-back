@@ -54,7 +54,7 @@ export class AuthService {
         return { token, usuario };
     }
 
-    async perfil(id: string) {
+    async perfil(id: number) {
         const usuario = await this.prisma.usuario.findFirst({
             where: { id, excluidoEm: null, ativo: true },
             select: CAMPOS_PUBLICOS,

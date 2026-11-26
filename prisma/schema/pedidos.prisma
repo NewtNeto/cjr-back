@@ -12,8 +12,8 @@
 
 // Cada usuário tem no máximo um carrinho, que pode misturar produtos de várias lojas.
 model Carrinho {
-  id        String @id @default(uuid()) @db.Uuid
-  usuarioId String @unique @map("usuario_id") @db.Uuid
+  id        Int @id @default(autoincrement())
+  usuarioId Int @unique @map("usuario_id")
 
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
@@ -26,10 +26,10 @@ model Carrinho {
 
 // O preço NÃO é guardado aqui: o carrinho sempre mostra o preço atual do produto.
 model ItemCarrinho {
-  id         String @id @default(uuid()) @db.Uuid
-  carrinhoId String @map("carrinho_id") @db.Uuid
-  produtoId  String @map("produto_id") @db.Uuid
-  quantidade Int    @default(1)
+  id         Int @id @default(autoincrement())
+  carrinhoId Int @map("carrinho_id")
+  produtoId  Int @map("produto_id")
+  quantidade Int @default(1)
 
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
@@ -60,11 +60,11 @@ enum StatusPedido {
 // Um pedido pertence a um cliente e a UMA loja. Pedidos nunca são apagados:
 // quando algo dá errado, o status muda para CANCELADO.
 model Pedido {
-  id         String       @id @default(uuid()) @db.Uuid
-  // Número amigável para mostrar ao cliente e à loja (o id UUID fica interno).
+  id         Int          @id @default(autoincrement())
+  // Número amigável para mostrar ao cliente e à loja.
   numero     Int          @unique @default(autoincrement())
-  clienteId  String       @map("cliente_id") @db.Uuid
-  lojaId     String       @map("loja_id") @db.Uuid
+  clienteId  Int          @map("cliente_id")
+  lojaId     Int          @map("loja_id")
   status     StatusPedido @default(PENDENTE)
   // Soma dos subtotais dos itens, calculada na hora da compra.
   total      Decimal      @db.Decimal(12, 2)
@@ -85,9 +85,9 @@ model Pedido {
 // Foto do produto no momento da compra. Título e preço são copiados para que
 // mudanças futuras no produto não alterem o histórico do pedido.
 model ItemPedido {
-  id            String  @id @default(uuid()) @db.Uuid
-  pedidoId      String  @map("pedido_id") @db.Uuid
-  produtoId     String  @map("produto_id") @db.Uuid
+  id            Int     @id @default(autoincrement())
+  pedidoId      Int     @map("pedido_id")
+  produtoId     Int     @map("produto_id")
   tituloProduto String  @map("titulo_produto")
   precoUnitario Decimal @map("preco_unitario") @db.Decimal(12, 2)
   quantidade    Int

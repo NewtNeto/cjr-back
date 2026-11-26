@@ -1,3 +1,7 @@
+-- Banco inteiro recriado com ids inteiros (autoincrement) no lugar de UUID.
+-- Junta as migrations antigas numa so. Para aplicar: npx prisma migrate reset
+
+-- ===== antes: 20261015000000_modelagem_inicial =====
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
@@ -18,9 +22,9 @@ CREATE TYPE "papel_usuario" AS ENUM ('ADMIN', 'VENDEDOR', 'CLIENTE');
 
 -- CreateTable
 CREATE TABLE "avaliacoes_loja" (
-    "id" UUID NOT NULL,
-    "loja_id" UUID NOT NULL,
-    "usuario_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "loja_id" INTEGER NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
     "nota" INTEGER NOT NULL,
     "comentario" TEXT,
     "resposta" TEXT,
@@ -33,9 +37,9 @@ CREATE TABLE "avaliacoes_loja" (
 
 -- CreateTable
 CREATE TABLE "avaliacoes_produto" (
-    "id" UUID NOT NULL,
-    "produto_id" UUID NOT NULL,
-    "usuario_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "produto_id" INTEGER NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
     "nota" INTEGER NOT NULL,
     "comentario" TEXT,
     "resposta" TEXT,
@@ -48,11 +52,11 @@ CREATE TABLE "avaliacoes_produto" (
 
 -- CreateTable
 CREATE TABLE "categorias" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "nome" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "ativa" BOOLEAN NOT NULL DEFAULT true,
-    "pai_id" UUID,
+    "pai_id" INTEGER,
     "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "atualizado_em" TIMESTAMP(3) NOT NULL,
 
@@ -61,9 +65,9 @@ CREATE TABLE "categorias" (
 
 -- CreateTable
 CREATE TABLE "produtos" (
-    "id" UUID NOT NULL,
-    "loja_id" UUID NOT NULL,
-    "categoria_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "loja_id" INTEGER NOT NULL,
+    "categoria_id" INTEGER NOT NULL,
     "titulo" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "descricao" TEXT,
@@ -80,8 +84,8 @@ CREATE TABLE "produtos" (
 
 -- CreateTable
 CREATE TABLE "imagens_produto" (
-    "id" UUID NOT NULL,
-    "produto_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "produto_id" INTEGER NOT NULL,
     "url" TEXT NOT NULL,
     "ordem" INTEGER NOT NULL DEFAULT 0,
     "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +95,7 @@ CREATE TABLE "imagens_produto" (
 
 -- CreateTable
 CREATE TABLE "lojas" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "nome" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "descricao" TEXT,
@@ -109,9 +113,9 @@ CREATE TABLE "lojas" (
 
 -- CreateTable
 CREATE TABLE "membros_loja" (
-    "id" UUID NOT NULL,
-    "loja_id" UUID NOT NULL,
-    "usuario_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "loja_id" INTEGER NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
     "papel" "papel_na_loja" NOT NULL DEFAULT 'VENDEDOR',
     "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "atualizado_em" TIMESTAMP(3) NOT NULL,
@@ -121,8 +125,8 @@ CREATE TABLE "membros_loja" (
 
 -- CreateTable
 CREATE TABLE "carrinhos" (
-    "id" UUID NOT NULL,
-    "usuario_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
     "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "atualizado_em" TIMESTAMP(3) NOT NULL,
 
@@ -131,9 +135,9 @@ CREATE TABLE "carrinhos" (
 
 -- CreateTable
 CREATE TABLE "itens_carrinho" (
-    "id" UUID NOT NULL,
-    "carrinho_id" UUID NOT NULL,
-    "produto_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "carrinho_id" INTEGER NOT NULL,
+    "produto_id" INTEGER NOT NULL,
     "quantidade" INTEGER NOT NULL DEFAULT 1,
     "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "atualizado_em" TIMESTAMP(3) NOT NULL,
@@ -143,10 +147,10 @@ CREATE TABLE "itens_carrinho" (
 
 -- CreateTable
 CREATE TABLE "pedidos" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "numero" SERIAL NOT NULL,
-    "cliente_id" UUID NOT NULL,
-    "loja_id" UUID NOT NULL,
+    "cliente_id" INTEGER NOT NULL,
+    "loja_id" INTEGER NOT NULL,
     "status" "status_pedido" NOT NULL DEFAULT 'PENDENTE',
     "total" DECIMAL(12,2) NOT NULL,
     "observacao" TEXT,
@@ -158,9 +162,9 @@ CREATE TABLE "pedidos" (
 
 -- CreateTable
 CREATE TABLE "itens_pedido" (
-    "id" UUID NOT NULL,
-    "pedido_id" UUID NOT NULL,
-    "produto_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "pedido_id" INTEGER NOT NULL,
+    "produto_id" INTEGER NOT NULL,
     "titulo_produto" TEXT NOT NULL,
     "preco_unitario" DECIMAL(12,2) NOT NULL,
     "quantidade" INTEGER NOT NULL,
@@ -171,7 +175,7 @@ CREATE TABLE "itens_pedido" (
 
 -- CreateTable
 CREATE TABLE "usuarios" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "nome" TEXT NOT NULL,
     "nome_usuario" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -190,8 +194,8 @@ CREATE TABLE "usuarios" (
 
 -- CreateTable
 CREATE TABLE "tokens_recuperacao_senha" (
-    "id" UUID NOT NULL,
-    "usuario_id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
     "token_hash" TEXT NOT NULL,
     "expira_em" TIMESTAMP(3) NOT NULL,
     "usado_em" TIMESTAMP(3),
@@ -338,3 +342,93 @@ ALTER TABLE "itens_pedido" ADD CONSTRAINT "itens_pedido_produto_id_fkey" FOREIGN
 -- AddForeignKey
 ALTER TABLE "tokens_recuperacao_senha" ADD CONSTRAINT "tokens_recuperacao_senha_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+-- ===== antes: 20261015000001_restricoes_de_valores =====
+-- Restrições que o Prisma não consegue declarar no schema.
+-- Elas protegem o banco mesmo que algum código esqueça de validar.
+-- (Esta migration foi escrita à mão; as próximas continuam sendo geradas pelo Prisma.)
+
+-- Produtos: preço e estoque nunca negativos.
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_preco_nao_negativo" CHECK ("preco" >= 0);
+ALTER TABLE "produtos" ADD CONSTRAINT "produtos_estoque_nao_negativo" CHECK ("estoque" >= 0);
+
+-- Carrinho e itens do pedido: sempre pelo menos 1 unidade.
+ALTER TABLE "itens_carrinho" ADD CONSTRAINT "itens_carrinho_quantidade_positiva" CHECK ("quantidade" > 0);
+ALTER TABLE "itens_pedido" ADD CONSTRAINT "itens_pedido_quantidade_positiva" CHECK ("quantidade" > 0);
+
+-- Pedidos: valores não negativos e contas fechando (subtotal do item = preço x quantidade).
+ALTER TABLE "itens_pedido" ADD CONSTRAINT "itens_pedido_valores_nao_negativos" CHECK ("preco_unitario" >= 0 AND "subtotal" >= 0);
+ALTER TABLE "itens_pedido" ADD CONSTRAINT "itens_pedido_subtotal_confere" CHECK ("subtotal" = "preco_unitario" * "quantidade");
+ALTER TABLE "pedidos" ADD CONSTRAINT "pedidos_total_nao_negativo" CHECK ("total" >= 0);
+
+-- Avaliações: nota de 0 a 5 estrelas.
+ALTER TABLE "avaliacoes_loja" ADD CONSTRAINT "avaliacoes_loja_nota_valida" CHECK ("nota" BETWEEN 0 AND 5);
+ALTER TABLE "avaliacoes_produto" ADD CONSTRAINT "avaliacoes_produto_nota_valida" CHECK ("nota" BETWEEN 0 AND 5);
+
+-- Formato dos dados: e-mail e nome de usuário em minúsculas, documentos só com números.
+ALTER TABLE "usuarios" ADD CONSTRAINT "usuarios_cpf_formato" CHECK ("cpf" IS NULL OR "cpf" ~ '^[0-9]{11}$');
+ALTER TABLE "usuarios" ADD CONSTRAINT "usuarios_email_minusculo" CHECK ("email" = lower("email"));
+ALTER TABLE "usuarios" ADD CONSTRAINT "usuarios_nome_usuario_minusculo" CHECK ("nome_usuario" = lower("nome_usuario"));
+ALTER TABLE "lojas" ADD CONSTRAINT "lojas_cnpj_formato" CHECK ("cnpj" IS NULL OR "cnpj" ~ '^[0-9]{14}$');
+
+-- ===== antes: 20261106000000_foto_perfil =====
+-- AlterTable
+ALTER TABLE "usuarios" ADD COLUMN "foto_url" TEXT;
+
+-- ===== antes: 20261117000000_comentarios =====
+-- CreateTable
+CREATE TABLE "comentarios" (
+    "id" SERIAL NOT NULL,
+    "usuario_id" INTEGER NOT NULL,
+    "texto" TEXT NOT NULL,
+    "avaliacao_loja_id" INTEGER,
+    "avaliacao_produto_id" INTEGER,
+    "produto_id" INTEGER,
+    "criado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizado_em" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "comentarios_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "comentarios_avaliacao_loja_id_criado_em_idx" ON "comentarios"("avaliacao_loja_id", "criado_em");
+
+-- CreateIndex
+CREATE INDEX "comentarios_avaliacao_produto_id_criado_em_idx" ON "comentarios"("avaliacao_produto_id", "criado_em");
+
+-- CreateIndex
+CREATE INDEX "comentarios_produto_id_criado_em_idx" ON "comentarios"("produto_id", "criado_em");
+
+-- CreateIndex
+CREATE INDEX "comentarios_usuario_id_idx" ON "comentarios"("usuario_id");
+
+-- AddForeignKey
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_avaliacao_loja_id_fkey" FOREIGN KEY ("avaliacao_loja_id") REFERENCES "avaliacoes_loja"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_avaliacao_produto_id_fkey" FOREIGN KEY ("avaliacao_produto_id") REFERENCES "avaliacoes_produto"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "produtos"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- regras escritas a mao (o prisma nao declara CHECK no schema)
+
+-- o comentario fica em um lugar so: avaliacao de loja, avaliacao de produto ou produto
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_um_lugar_so" CHECK (num_nonnulls("avaliacao_loja_id", "avaliacao_produto_id", "produto_id") = 1);
+
+-- texto nao pode ficar vazio nem so com espacos
+ALTER TABLE "comentarios" ADD CONSTRAINT "comentarios_texto_preenchido" CHECK (length(btrim("texto")) > 0);
+
+-- ===== antes: 20261125000000_loja_categoria_e_imagens =====
+-- AlterTable
+ALTER TABLE "lojas" ADD COLUMN     "banner_url" TEXT,
+ADD COLUMN     "categoria_id" INTEGER,
+ADD COLUMN     "foto_url" TEXT;
+
+-- CreateIndex
+CREATE INDEX "lojas_categoria_id_idx" ON "lojas"("categoria_id");
+
+-- AddForeignKey
+ALTER TABLE "lojas" ADD CONSTRAINT "lojas_categoria_id_fkey" FOREIGN KEY ("categoria_id") REFERENCES "categorias"("id") ON DELETE SET NULL ON UPDATE CASCADE;

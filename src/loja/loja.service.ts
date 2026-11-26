@@ -93,7 +93,7 @@ export class LojaService {
   constructor(private readonly prisma: PrismaService) {}
 
   // cria a loja ja ativa e coloca quem criou como dono
-  async criar(usuarioId: string, dados: CreateLojaDto, arquivos: ArquivosLoja) {
+  async criar(usuarioId: number, dados: CreateLojaDto, arquivos: ArquivosLoja) {
     try {
       await this.garantirCategoria(dados.categoriaId);
       await garantirSvgSeguro(arquivos);
@@ -148,7 +148,7 @@ export class LojaService {
   }
 
   // lojas de quem esta logado
-  minhas(usuarioId: string) {
+  minhas(usuarioId: number) {
     return this.prisma.loja.findMany({
       where: { excluidoEm: null, membros: { some: { usuarioId } } },
       select: camposLoja,
@@ -156,8 +156,52 @@ export class LojaService {
     });
   }
 
+  // lojas de uma pessoa (tela de perfil), com os produtos a venda e as avaliacoes recebidas.
+  // pendente entra porque a loja nasce pendente e ainda nao existe tela de aprovacao
+  daPessoa(usuarioId: number) {
+    return this.prisma.loja.findMany({
+      where: {
+        excluidoEm: null,
+        status: { in: ['ATIVA', 'PENDENTE'] },
+        membros: { some: { usuarioId } },
+      },
+      orderBy: { criadoEm: 'desc' },
+      select: {
+        ...camposLoja,
+        produtos: {
+          where: { excluidoEm: null, status: 'ATIVO' },
+          orderBy: { criadoEm: 'desc' },
+          select: {
+            id: true,
+            titulo: true,
+            preco: true,
+            estoque: true,
+            criadoEm: true,
+            imagens: {
+              orderBy: { ordem: 'asc' },
+              take: 1,
+              select: { url: true },
+            },
+          },
+        },
+        avaliacoes: {
+          orderBy: { criadoEm: 'desc' },
+          take: 20,
+          select: {
+            id: true,
+            nota: true,
+            comentario: true,
+            criadoEm: true,
+            // quem avaliou: so o que aparece no card
+            usuario: { select: { id: true, nome: true, fotoUrl: true } },
+          },
+        },
+      },
+    });
+  }
+
   // dados da loja e os produtos a venda
-  async buscar(id: string) {
+  async buscar(id: number) {
     const loja = await this.prisma.loja.findFirst({
       where: { id, excluidoEm: null },
       select: {
@@ -191,8 +235,8 @@ export class LojaService {
 
   // edita os dados e troca as imagens enviadas (as antigas sao apagadas)
   async atualizar(
-    id: string,
-    usuarioId: string,
+    id: number,
+    usuarioId: number,
     dados: UpdateLojaDto,
     arquivos: ArquivosLoja,
   ) {
@@ -228,7 +272,7 @@ export class LojaService {
   }
 
   // exclusao logica: a loja fecha e os produtos saem do catalogo, o historico fica
-  async excluir(id: string, usuarioId: string) {
+  async excluir(id: number, usuarioId: number) {
     await this.garantirDono(id, usuarioId);
     const agora = new Date();
 
@@ -247,7 +291,7 @@ export class LojaService {
   }
 
   // so o dono pode editar ou excluir
-  private async garantirDono(lojaId: string, usuarioId: string) {
+  private async garantirDono(lojaId: number, usuarioId: number) {
     const loja = await this.prisma.loja.findFirst({
       where: { id: lojaId, excluidoEm: null },
       select: {
@@ -264,7 +308,7 @@ export class LojaService {
   }
 
   // a loja usa uma categoria principal ativa (mercado, beleza...), nunca uma subcategoria
-  private async garantirCategoria(categoriaId: string) {
+  private async garantirCategoria(categoriaId: number) {
     const categoria = await this.prisma.categoria.findFirst({
       where: { id: categoriaId, ativa: true, paiId: null },
       select: { id: true },

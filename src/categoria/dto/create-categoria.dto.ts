@@ -1,4 +1,5 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, IsInt } from 'class-validator';
 
 export class CreateCategoriaDto {
     @IsString()
@@ -20,6 +21,7 @@ export class CreateCategoriaDto {
 
     // preencher só em subcategorias: id da categoria "mãe"
     @IsOptional()
-    @IsUUID('all', { message: 'O paiId deve ser um UUID válido.' })
-    paiId?: string | null;
+    @Type(() => Number)
+    @IsInt({ message: 'O paiId deve ser o número (id) de uma categoria.' })
+    paiId?: number | null;
 }

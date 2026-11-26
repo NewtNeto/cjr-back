@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -52,8 +52,14 @@ export class LojaController {
     return this.lojaService.minhas(requisicao.usuario.sub);
   }
 
+  // lojas de uma pessoa, para a tela de perfil (publica: qualquer um ve o perfil de qualquer um)
+  @Get('usuario/:usuarioId')
+  daPessoa(@Param('usuarioId', ParseIntPipe) usuarioId: number) {
+    return this.lojaService.daPessoa(usuarioId);
+  }
+
   @Get(':id')
-  buscar(@Param('id', ParseUUIDPipe) id: string) {
+  buscar(@Param('id', ParseIntPipe) id: number) {
     return this.lojaService.buscar(id);
   }
 
@@ -61,7 +67,7 @@ export class LojaController {
   @UseGuards(AuthGuard)
   @UseInterceptors(FileFieldsInterceptor(camposImagem, opcoesUploadLoja))
   atualizar(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Req() requisicao: RequisicaoAutenticada,
     @Body() dados: UpdateLojaDto,
     @UploadedFiles() arquivos: ArquivosLoja = {},
@@ -77,7 +83,7 @@ export class LojaController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   excluir(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Req() requisicao: RequisicaoAutenticada,
   ) {
     return this.lojaService.excluir(id, requisicao.usuario.sub);

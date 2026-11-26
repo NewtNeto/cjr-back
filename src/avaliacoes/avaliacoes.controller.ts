@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common';
 import { AvaliacoesService } from './avaliacoes.service';
 import {
   CreateAvaliacaoLojaDto,
@@ -23,18 +23,18 @@ export class AvaliacoesController {
   }
 
   @Get('lojas/:id')
-  findOneLoja(@Param('id') id: string) {
+  findOneLoja(@Param('id', ParseIntPipe) id: number) {
     return this.avaliacoesService.findOneLoja(id);
   }
 
   @Patch('lojas/:id')
-  updateLoja(@Param('id') id: string, @Body() dto: UpdateAvaliacaoLojaDto) {
+  updateLoja(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAvaliacaoLojaDto) {
     return this.avaliacoesService.updateLoja(id, dto);
   }
 
   @Delete('lojas/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeLoja(@Param('id') id: string) {
+  removeLoja(@Param('id', ParseIntPipe) id: number) {
     return this.avaliacoesService.removeLoja(id);
   }
 
@@ -50,18 +50,18 @@ export class AvaliacoesController {
   }
 
   @Get('produtos/:id')
-  findOneProduto(@Param('id') id: string) {
+  findOneProduto(@Param('id', ParseIntPipe) id: number) {
     return this.avaliacoesService.findOneProduto(id);
   }
 
   @Patch('produtos/:id')
-  updateProduto(@Param('id') id: string, @Body() dto: UpdateAvaliacaoProdutoDto) {
+  updateProduto(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAvaliacaoProdutoDto) {
     return this.avaliacoesService.updateProduto(id, dto);
   }
 
   @Delete('produtos/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeProduto(@Param('id') id: string) {
+  removeProduto(@Param('id', ParseIntPipe) id: number) {
     return this.avaliacoesService.removeProduto(id);
   }
 }

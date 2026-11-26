@@ -11,12 +11,12 @@ enum StatusProduto {
 // Categorias organizadas em até dois níveis (categoria -> subcategoria).
 // Quem cria e edita categorias é a plataforma (ADMIN), não as lojas.
 model Categoria {
-  id    String  @id @default(uuid()) @db.Uuid
+  id    Int     @id @default(autoincrement())
   nome  String
   slug  String  @unique
   ativa Boolean @default(true)
   // Preenchido apenas em subcategorias, apontando para a categoria "mãe".
-  paiId String? @map("pai_id") @db.Uuid
+  paiId Int?    @map("pai_id")
 
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
@@ -33,9 +33,9 @@ model Categoria {
 // Cada produto pertence a UMA loja. Não há variações (tamanho, cor): se a loja
 // vende a mesma peça em dois tamanhos, cadastra dois produtos.
 model Produto {
-  id          String        @id @default(uuid()) @db.Uuid
-  lojaId      String        @map("loja_id") @db.Uuid
-  categoriaId String        @map("categoria_id") @db.Uuid
+  id          Int           @id @default(autoincrement())
+  lojaId      Int           @map("loja_id")
+  categoriaId Int           @map("categoria_id")
   // Título do anúncio (mesmo termo usado nos requisitos).
   titulo      String
   // Texto usado na URL do produto. Único dentro da mesma loja.
@@ -68,8 +68,8 @@ model Produto {
 }
 
 model ImagemProduto {
-  id        String @id @default(uuid()) @db.Uuid
-  produtoId String @map("produto_id") @db.Uuid
+  id        Int    @id @default(autoincrement())
+  produtoId Int    @map("produto_id")
   url       String
   // Posição na galeria. A imagem de ordem 0 é a capa.
   ordem     Int    @default(0)

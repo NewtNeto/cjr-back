@@ -7,7 +7,7 @@ import { UpdateComentarioDto } from './dto/update-comentario.dto';
 export class ComentarioService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(usuarioId: string, dto: CreateComentarioDto) {
+  async create(usuarioId: number, dto: CreateComentarioDto) {
     const destinos = [
       dto.avaliacaoLojaId,
       dto.avaliacaoProdutoId,
@@ -41,7 +41,7 @@ export class ComentarioService {
     });
   }
 
-  async findAll(filtros: { produtoId?: string; avaliacaoLojaId?: string; avaliacaoProdutoId?: string; }) {
+  async findAll(filtros: { produtoId?: number; avaliacaoLojaId?: number; avaliacaoProdutoId?: number; }) {
     return this.prisma.comentario.findMany({
       where: {
         produtoId: filtros.produtoId,
@@ -57,7 +57,7 @@ export class ComentarioService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const comentario = await this.prisma.comentario.findUnique({
       where: { id },
       include: {
@@ -74,7 +74,7 @@ export class ComentarioService {
     return comentario;
   }
 
-  async update(id: string, usuarioId: string, dto: UpdateComentarioDto) {
+  async update(id: number, usuarioId: number, dto: UpdateComentarioDto) {
     const comentario = await this.findOne(id);
 
     if (comentario.usuarioId !== usuarioId) {
@@ -94,7 +94,7 @@ export class ComentarioService {
     });
   }
 
-  async remove(id: string, usuarioId: string) {
+  async remove(id: number, usuarioId: number) {
     const comentario = await this.findOne(id);
 
     if (comentario.usuarioId !== usuarioId) {

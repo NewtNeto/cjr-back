@@ -1,4 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { AtualizarPerfilDto } from './dto/atualizar-perfil.dto';
+import { AlterarSenhaDto } from './dto/alterar-senha.dto';
 import { unlink } from 'fs/promises';
 import { basename, join } from 'path';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -72,7 +74,7 @@ export class UserService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const user = await this.prisma.usuario.findFirst({
       where: { id, excluidoEm: null },
       select: {
@@ -96,7 +98,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     await this.findOne(id);
 
     const dataToUpdate: any = { ...updateUserDto };
@@ -130,7 +132,7 @@ export class UserService {
     });
   }
 
-  async atualizarFoto(id: string, foto: Express.Multer.File | undefined) {
+  async atualizarFoto(id: number, foto: Express.Multer.File | undefined) {
     if (!foto) {
       throw new BadRequestException('Envie uma imagem no campo "foto".');
     }
@@ -170,9 +172,63 @@ export class UserService {
     await unlink(join(PASTA_FOTOS, nomeArquivo)).catch(() => undefined);
   }
 
-  async remove(id: string) {
-    return this.prisma.usuario.delete({
+  // dados que a propria pessoa muda no modal "editar perfil"
+  async atualizarPerfil(id: number, dados: AtualizarPerfilDto) {
+    await this.findOne(id);
+
+    const nome = dados.nome?.trim();
+    const email = dados.email?.trim().toLowerCase();
+    const nomeUsuario = dados.nomeUsuario?.trim().toLowerCase();
+
+    // e-mail e nome de usuario sao unicos: confere antes para dar uma mensagem clara
+    if (email && (await this.prisma.usuario.findFirst({ where: { email, NOT: { id } } }))) {
+      throw new ConflictException('Esse e-mail já está em uso.');
+    }
+    if (nomeUsuario && (await this.prisma.usuario.findFirst({ where: { nomeUsuario, NOT: { id } } }))) {
+      throw new ConflictException('Esse nome de usuário já está em uso.');
+    }
+
+    return this.prisma.usuario.update({
       where: { id },
+      data: { nome, email, nomeUsuario },
+      select: { id: true, nome: true, nomeUsuario: true, email: true, fotoUrl: true },
+    });
+  }
+
+  async alterarSenha(id: number, dados: AlterarSenhaDto) {
+    const usuario = await this.prisma.usuario.findFirst({
+      where: { id, excluidoEm: null },
+      select: { senhaHash: true },
+    });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+    if (!(await bcrypt.compare(dados.senhaAtual, usuario.senhaHash))) {
+      throw new BadRequestException('A senha atual está incorreta.');
+    }
+
+    await this.prisma.usuario.update({
+      where: { id },
+      data: { senhaHash: await bcrypt.hash(dados.novaSenha, 10) },
+    });
+  }
+
+  // "apagar" a conta: marca como excluida em vez de apagar a linha, porque pedidos, lojas e
+  // avaliacoes apontam para ela (apagar de verdade daria erro no banco).
+  // e-mail, nome de usuario e cpf sao trocados/limpos para poderem ser usados num cadastro novo
+  async remove(id: number) {
+    await this.findOne(id);
+
+    await this.prisma.usuario.update({
+      where: { id },
+      data: {
+        excluidoEm: new Date(),
+        ativo: false,
+        email: `${id}@conta-excluida.local`,
+        nomeUsuario: `excluido-${id}`,
+        cpf: null,
+      },
     });
   }
 }

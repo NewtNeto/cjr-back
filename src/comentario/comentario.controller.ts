@@ -1,4 +1,4 @@
-import { ParseUUIDPipe, Query, Req, UseGuards } from '@nestjs/common'
+import { ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common'
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AuthGuard, type RequisicaoAutenticada } from '../auth/auth.guard';
 import { ComentarioService } from './comentario.service';
@@ -16,24 +16,28 @@ export class ComentarioController {
   }
 
   @Get()
-  findAll(@Query('produtoId') produtoId?: string, @Query('avaliacaoLojaId') avaliacaoLojaId?: string, @Query('avaliacaoProdutoId') avaliacaoProdutoId?: string) {
+  findAll(
+    @Query('produtoId', new ParseIntPipe({ optional: true })) produtoId?: number,
+    @Query('avaliacaoLojaId', new ParseIntPipe({ optional: true })) avaliacaoLojaId?: number,
+    @Query('avaliacaoProdutoId', new ParseIntPipe({ optional: true })) avaliacaoProdutoId?: number,
+  ) {
     return this.comentarioService.findAll({produtoId, avaliacaoLojaId, avaliacaoProdutoId});
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.comentarioService.findOne(id);
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequisicaoAutenticada, @Body() updateComentarioDto: UpdateComentarioDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Req() req: RequisicaoAutenticada, @Body() updateComentarioDto: UpdateComentarioDto) {
     return this.comentarioService.update(id, req.usuario.sub, updateComentarioDto);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: RequisicaoAutenticada) {
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequisicaoAutenticada) {
     return this.comentarioService.remove(id, req.usuario.sub);
   }
 }

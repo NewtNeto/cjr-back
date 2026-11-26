@@ -18,7 +18,7 @@ enum PapelNaLoja {
 }
 
 model Loja {
-  id           String     @id @default(uuid()) @db.Uuid
+  id           Int        @id @default(autoincrement())
   nome         String
   // Texto usado na URL da loja. Ex.: "casa-do-cafe". Único na plataforma.
   slug         String     @unique
@@ -31,7 +31,7 @@ model Loja {
   status       StatusLoja @default(PENDENTE)
 
   // categoria principal da loja (mercado, beleza...)
-  categoriaId String? @map("categoria_id") @db.Uuid
+  categoriaId Int?    @map("categoria_id")
   // imagens do modal: foto de perfil (circulo da loja) e banner (topo da pagina). a logo svg fica em logoUrl
   fotoUrl     String? @map("foto_url")
   bannerUrl   String? @map("banner_url")
@@ -53,9 +53,9 @@ model Loja {
 
 // Liga uma pessoa a uma loja (quem é dono e quem vende nela).
 model MembroLoja {
-  id        String      @id @default(uuid()) @db.Uuid
-  lojaId    String      @map("loja_id") @db.Uuid
-  usuarioId String      @map("usuario_id") @db.Uuid
+  id        Int         @id @default(autoincrement())
+  lojaId    Int         @map("loja_id")
+  usuarioId Int         @map("usuario_id")
   papel     PapelNaLoja @default(VENDEDOR)
 
   criadoEm     DateTime @default(now()) @map("criado_em")
