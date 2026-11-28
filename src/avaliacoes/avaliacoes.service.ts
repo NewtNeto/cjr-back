@@ -47,6 +47,7 @@ export class AvaliacoesService {
         },
         loja: {
           select: {
+            nome : true,
             membros: {
               where: { papel: 'DONO' },
               select: { usuarioId: true },
@@ -66,6 +67,7 @@ export class AvaliacoesService {
     return {
       ...resto,
       loja: {
+        nome: loja?.nome ?? '',
         donoId: loja?.membros[0]?.usuarioId ?? null,
       },
     };
