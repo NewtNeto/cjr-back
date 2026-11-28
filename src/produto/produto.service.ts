@@ -3,6 +3,14 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateProdutoDto } from './dto/create-produto.dto';
 import { UpdateProdutoDto } from './dto/update-produto.dto';
 
+const includeProduto = {
+  categoria: true,
+  loja: true,
+  imagens: {
+    orderBy: { ordem: 'asc' as const },
+  },
+};
+
 @Injectable()
 export class ProdutoService {
   constructor(private prisma: PrismaService) {}
@@ -10,20 +18,22 @@ export class ProdutoService {
   async create(createProdutoDto: CreateProdutoDto) {
     return this.prisma.produto.create({
       data: createProdutoDto,
+      include: includeProduto,
     });
   }
 
   async findAll() {
     return this.prisma.produto.findMany({
       where: { excluidoEm: null },
-      include: { categoria: true, loja: true },
+      orderBy: { criadoEm: 'desc' },
+      include: includeProduto,
     });
   }
 
   async findOne(id: number) {
     const produto = await this.prisma.produto.findUnique({
       where: { id },
-      include: { categoria: true, loja: true, imagens: true },
+      include: includeProduto,
     });
 
     if (!produto || produto.excluidoEm) {
@@ -39,6 +49,7 @@ export class ProdutoService {
     return this.prisma.produto.update({
       where: { id },
       data: updateProdutoDto,
+      include: includeProduto,
     });
   }
 
